@@ -1,7 +1,6 @@
 package sington;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * 懒汉式的单例模式
@@ -65,14 +64,23 @@ public class Lazy {
         }
     }
 
-    //测试synchronized锁下 10000次获取对象的速度
-    public static void test4(){
+    //测试synchronized锁下 1000个线程循环100000次获取对象的速度
+    public static void test4() throws InterruptedException {
+
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 10000; i++) {
+        //用于阻塞当前线程
+       // 是通过一个计数器来实现的，计数器的初始值是线程的数量。
+       // 每当一个线程执行完毕后，计数器的值就-1，当计数器的值为0时，表示所有线程都执行完毕，然后在闭锁上等待的线程就可以恢复工作了。
+        CountDownLatch countDownLatch = new CountDownLatch(1000);
+        for (int i = 0; i < 1000; i++) {
             new Thread(()->{//此处使用lambda表达式
-                Lazy lazy=Lazy.getLazy2();
+                for (int j = 0; j < 100000; j++) {
+                    Lazy lazy=Lazy.getLazy2();
+                }
+                countDownLatch.countDown();//循环执行完毕 里面的线程数-1
             }).start();
         }
+        countDownLatch.await();//调用await()方法的线程会被挂起，它会等待直到count值为0才继续执行
         long end = System.currentTimeMillis();
         System.out.println(end-start);
     }
@@ -114,20 +122,25 @@ public class Lazy {
         }
     }
 
-    //测试DCL模式下多线程单例
-    public static void test6(){
+    //测试DCL模式下多线程单例的速度
+    public static void test6() throws InterruptedException {
+        CountDownLatch countDownLatch = new CountDownLatch(1000);
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 10000 ; i++) {
+        for (int i = 0; i < 1000; i++) {
             new Thread(()->{//此处使用lambda表达式
-                Lazy lazy=Lazy.getLazy3();
+                for (int j = 0; j < 100000; j++) {
+                    Lazy lazy=Lazy.getLazy3();
+                }
+                countDownLatch.countDown();
             }).start();
         }
+        countDownLatch.await();
         long end = System.currentTimeMillis();
         System.out.println(end-start);
     }
 
 
-    public static void main(String[] args) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public static void main(String[] args) throws Exception {
         //测试在单例模式下的获取
 //        test1();
         //测试在多线程下的的单例实现
@@ -135,23 +148,23 @@ public class Lazy {
         //测试在多线程下的的单例实现
 //        test3();
         //测试synchronized锁下 10000次获取对象的速度
-//        test4();
+        test4();
         //测试双重检测单例模式
 //        test5();
         //测试双重检测单例模式 10000次获取对象的速度
-//        test6();
+        test6();
 
         //利用反射破坏单例模式
         //获取一个对象
-        Lazy lazy = Lazy.getLazy3();
+//        Lazy lazy = Lazy.getLazy3();
         //获取空参构造器
-        Constructor<Lazy> declaredConstructor = Lazy.class.getDeclaredConstructor(null);
+//        Constructor<Lazy> declaredConstructor = Lazy.class.getDeclaredConstructor(null);
         //获取私有的
-        declaredConstructor.setAccessible(true);
+//        declaredConstructor.setAccessible(true);
         //使用无参构造器
-        Lazy lazy2 = declaredConstructor.newInstance();
-        System.out.println(lazy);
-        System.out.println(lazy2);
+//        Lazy lazy2 = declaredConstructor.newInstance();
+//        System.out.println(lazy);
+//        System.out.println(lazy2);
 
     }
 }
