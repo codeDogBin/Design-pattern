@@ -1,4 +1,4 @@
-package sington;
+package singleton;
 
 /**
  * 静态内部类

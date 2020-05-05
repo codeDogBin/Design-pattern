@@ -1,4 +1,4 @@
-package sington;
+package singleton;
 
 import java.util.concurrent.CountDownLatch;
 

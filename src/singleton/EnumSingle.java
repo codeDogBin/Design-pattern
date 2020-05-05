@@ -1,4 +1,4 @@
-package sington;
+package singleton;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

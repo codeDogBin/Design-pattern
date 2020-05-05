@@ -1,4 +1,4 @@
-package sington;
+package singleton;
 
 /**
  * 饿汉式单例模式
